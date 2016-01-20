@@ -1,10 +1,11 @@
 'use strict';
 
 var express = require('express');
-var routes = require('./app/routes/index.js');
+//var routes = require('./app/routes/index.js');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var session = require('express-session');
+var useragent = require('express-useragent'); 
 
 var app = express();
 require('dotenv').load();
@@ -22,10 +23,28 @@ app.use(session({
 	saveUninitialized: true
 }));
 
+app.use(useragent.express()); 
+
+app.route('/')
+	.get(function(req, res){
+		var ip = req.ip;
+		var lang = req.get("Accept-Language").split(',')[0]; 
+		var opsys = req.useragent.os; 
+		console.log(opsys);
+		
+		var sendObj = {
+			"ip": ip, 
+			"Language": lang,
+			"OS": opsys
+		}; 
+		
+		res.send(JSON.stringify(sendObj)); 
+	});
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-routes(app, passport);
+//routes(app, passport);
 
 var port = process.env.PORT || 8080;
 app.listen(port,  function () {
